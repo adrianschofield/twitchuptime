@@ -52,7 +52,7 @@ $(document).ready(function start() {
     myTwitchPoller = setInterval(getStream, oneMinutePoll);
     
     //Debugging
-    //displayTime();
+    displayTime();
    
     
 });
