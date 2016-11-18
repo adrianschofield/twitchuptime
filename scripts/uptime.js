@@ -47,6 +47,9 @@ $(document).ready(function start() {
     
     //Parse the text format so we know what to display
     parseText();
+
+    //For Kraken v5 channel id requirements
+    getChannelId()
     
     //Once we've got an actual uptime we can start the count up.
     myTwitchPoller = setInterval(getStream, oneMinutePoll);
@@ -56,6 +59,36 @@ $(document).ready(function start() {
    
     
 });
+
+//Need this section for Kraken v5 API calls to convert names to ids
+
+//v5 needs a Channel Id rather than a channel name
+
+function getChannelId() {
+   
+    //If you are testing this in IE you may need to uncomment the line below to allow cross site scripting
+	//$.support.cors = true; nfmebw2293663r1rski1j8d5vezfvpz
+    
+    //Using ajax here, could have used getJSON but the error handling is awful
+	$.ajax({
+	    url: "https://api.twitch.tv/kraken/search/channels?query=" + channel,
+	    dataType: 'json',
+        headers: {
+            'Client-ID': 'nfmebw2293663r1rski1j8d5vezfvpz',
+            'Accept': 'application/vnd.twitchtv.v5+json'
+        },
+        success: getChannelIdCallback
+	})
+    
+}
+
+function getChannelIdCallback(data) {
+
+    //We need to set the channel Id rather than the name
+    channel = data["channels"][0]["_id"];
+}
+
+//End of Kraken v5 requirement
 
 
 function getStream() {
@@ -67,6 +100,10 @@ function getStream() {
 	$.ajax({
 	    url: "https://api.twitch.tv/kraken/streams/" + channel,
 	    dataType: 'json',
+        headers: {
+            'Client-ID': 'nfmebw2293663r1rski1j8d5vezfvpz',
+            'Accept': 'application/vnd.twitchtv.v5+json'
+        },
         success: getStreamCallback
 	})
     
