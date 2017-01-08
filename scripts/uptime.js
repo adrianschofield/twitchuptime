@@ -49,7 +49,7 @@ $(document).ready(function start() {
     parseText();
 
     //For Kraken v5 channel id requirements
-    getChannelId()
+    getChannelId();
     
     //Once we've got an actual uptime we can start the count up.
     myTwitchPoller = setInterval(getStream, oneMinutePoll);
@@ -67,14 +67,14 @@ $(document).ready(function start() {
 function getChannelId() {
    
     //If you are testing this in IE you may need to uncomment the line below to allow cross site scripting
-	//$.support.cors = true; nfmebw2293663r1rski1j8d5vezfvpz
+	//$.support.cors = true; 
     
     //Using ajax here, could have used getJSON but the error handling is awful
 	$.ajax({
 	    url: "https://api.twitch.tv/kraken/search/channels?query=" + channel,
 	    dataType: 'json',
         headers: {
-            'Client-ID': 'nfmebw2293663r1rski1j8d5vezfvpz',
+            'Client-ID': '5lc2pznnxzs8gijvw7qgaw8eoisj6nd',
             'Accept': 'application/vnd.twitchtv.v5+json'
         },
         success: getChannelIdCallback
@@ -86,6 +86,9 @@ function getChannelIdCallback(data) {
 
     //We need to set the channel Id rather than the name
     channel = data["channels"][0]["_id"];
+	
+	//Debugging but left in for ease of use
+	getStream();
 }
 
 //End of Kraken v5 requirement
@@ -101,7 +104,7 @@ function getStream() {
 	    url: "https://api.twitch.tv/kraken/streams/" + channel,
 	    dataType: 'json',
         headers: {
-            'Client-ID': 'nfmebw2293663r1rski1j8d5vezfvpz',
+            'Client-ID': '5lc2pznnxzs8gijvw7qgaw8eoisj6nd',
             'Accept': 'application/vnd.twitchtv.v5+json'
         },
         success: getStreamCallback
@@ -118,6 +121,7 @@ function getStreamCallback (data) {
     var streamCreatedDate = null;
     var streamStartDate = null;
     var streamCurrentDate = null;
+	var streamUTCDate = null;
     var diffMilliseconds = null;
     //Check to see if the data actually contains a stream object
     //If not then the stream isn't live we can then make some decisions on what to do
@@ -144,9 +148,13 @@ function getStreamCallback (data) {
    
     //get the current time now() returns milliseconds
     streamCurrentDate = new Date(Date.now());
+	
+	//Convert the current local time into UTC 	
+	streamUTCDate = new Date(streamCurrentDate.getUTCFullYear(), streamCurrentDate.getUTCMonth(), streamCurrentDate.getUTCDate(),  streamCurrentDate.getUTCHours(), streamCurrentDate.getUTCMinutes(), streamCurrentDate.getUTCSeconds());
+    
     
     //subtract start from current to give uptime
-    diffMilliseconds = new Date(streamCurrentDate.getTime() - streamStartDate.getTime());
+    diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartDate.getTime());
     
     //extract the hours minutes seconds and update globals
     
