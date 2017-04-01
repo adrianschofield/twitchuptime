@@ -4,7 +4,7 @@
 var channel = 'unshapedadrian';
 
 //global for output format
-var myOutputFormat = 'Uptime: hh:mm:ss';
+var myOutputFormat = 'hh:mm:ss';
 
 //The variable above determines how the uptime is presented in the scene
 //You can change the word Uptime: to something of your choosing
@@ -120,6 +120,7 @@ function getStreamCallback (data) {
     //in time not actual times.
     var streamCreatedDate = null;
     var streamStartDate = null;
+	var streamStartUTCDate = null;
     var streamCurrentDate = null;
 	var streamUTCDate = null;
     var diffMilliseconds = null;
@@ -145,6 +146,10 @@ function getStreamCallback (data) {
     
     //The default date constructor works well on our date format
     streamStartDate = new Date(streamCreatedDate);
+	
+	//Convert the stream start time into UTC 	
+	streamStartUTCDate = new Date(streamStartDate.getUTCFullYear(), streamStartDate.getUTCMonth(), streamStartDate.getUTCDate(),  streamStartDate.getUTCHours(), streamStartDate.getUTCMinutes(), streamStartDate.getUTCSeconds());
+    
    
     //get the current time now() returns milliseconds
     streamCurrentDate = new Date(Date.now());
@@ -154,7 +159,7 @@ function getStreamCallback (data) {
     
     
     //subtract start from current to give uptime
-    diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartDate.getTime());
+    diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartUTCDate.getTime());
     
     //extract the hours minutes seconds and update globals
     
