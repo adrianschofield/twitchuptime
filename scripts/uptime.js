@@ -4,7 +4,7 @@
 var channel = 'unshapedadrian';
 
 //global for output format
-var myOutputFormat = 'hh:mm:ss';
+var myOutputFormat = 'Uptime: hh:mm:ss';
 
 //The variable above determines how the uptime is presented in the scene
 //You can change the word Uptime: to something of your choosing
