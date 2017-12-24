@@ -159,7 +159,7 @@ function getStreamCallback (data) {
     
     
     //subtract start from current to give uptime
-    //TODO - something here is going wrong in relation to TZs
+   
     diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartUTCDate.getTime());
     
     //extract the hours minutes seconds and update globals
