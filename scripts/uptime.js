@@ -4,7 +4,7 @@
 var channel = 'unshapedadrian';
 
 //global for output format
-var myOutputFormat = 'Uptime: hh:mm:ss';
+var myOutputFormat = 'hh:mm:ss';
 
 //The variable above determines how the uptime is presented in the scene
 //You can change the word Uptime: to something of your choosing
@@ -159,13 +159,14 @@ function getStreamCallback (data) {
     
     
     //subtract start from current to give uptime
+    //TODO - something here is going wrong in relation to TZs
     diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartUTCDate.getTime());
     
     //extract the hours minutes seconds and update globals
     
-    hrs = diffMilliseconds.getHours();
-    mins = diffMilliseconds.getMinutes();
-    secs = diffMilliseconds.getSeconds();
+    hrs = diffMilliseconds.getUTCHours();
+    mins = diffMilliseconds.getUTCMinutes();
+    secs = diffMilliseconds.getUTCSeconds();
     
     //show the time
     displayTime();
