@@ -2,7 +2,7 @@
 
 Display Twitch stream uptime in OBS or Xsplit
 
-Download all the files, there is a zip available here: http://unshapedadrian.co.uk/downloads/twitchuptime.zip and store them in a folder on your hard drive.
+Download all the files using the Download button top right and store them in a folder on your hard drive. There is a zip available here: http://unshapedadrian.co.uk/downloads/twitchuptime.zip but it may be out of date.
 
 Edit the file uptime.js in the scripts directory and change the channel name to reflect your channel name.
 By default the tool will display your uptime like this:
