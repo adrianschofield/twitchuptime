@@ -1,4 +1,4 @@
-#Twitch-Uptime
+#Twitch-Uptime#
 
 Display Twitch stream uptime in OBS or Xsplit
 
