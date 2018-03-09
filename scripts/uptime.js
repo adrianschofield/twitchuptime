@@ -39,7 +39,7 @@ var myOneSecondCounter = null;
 
 //This code runs when the DOM objects are initialised as defined in the jQuery documentation
 
-$(document).ready(function start() {
+window.onload = function () {
     
     
     //We want to check if the stream is live first
@@ -58,7 +58,7 @@ $(document).ready(function start() {
     displayTime();
    
     
-});
+};
 
 //Need this section for Kraken v5 API calls to convert names to ids
 
@@ -134,6 +134,7 @@ function getStreamCallback (data) {
             clearInterval(myOneSecondCounter);
             clearInterval(myTwitchPoller);
             myTwitchPoller = setInterval(getStream, oneMinutePoll);
+            isStreamLive = false;
             //clear the displayed timer
             upDateText("");
         }
@@ -188,13 +189,19 @@ function getStreamCallback (data) {
 
 function countUp(){
     
-    if(secs === 59){
+    if(secs === 59 & mins === 59 & hrs === 59){
         secs = 0;
-        mins++;
+        mins = 0;
+        hrs = 0;
     }
-    else if(mins === 59){
+    else if(secs === 59 & mins === 59){
+        secs = 0;
         mins = 0;
         hrs++;
+    }
+    else if(secs === 59){
+        secs = 0;
+        mins++;
     }
     else {
         secs++;
