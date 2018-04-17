@@ -37,6 +37,17 @@ var myOneSecondCounter = null;
  var useMins = false;
  var useSecs = false;
 
+ //API calling information
+//Kraken v5 Headers
+var v5headers = new Headers();
+v5headers.append('Client-ID', 'nfmebw2293663r1rski1j8d5vezfvpz');
+v5headers.append('Accept', 'application/vnd.twitchtv.v5+json');
+v5headers.append('Content-Type', 'application/json');
+
+//Helix headers
+var helixheaders = new Headers();
+helixheaders.append('Client-ID', 'nfmebw2293663r1rski1j8d5vezfvpz');
+
 //This code runs when the DOM objects are initialised as defined in the jQuery documentation
 
 window.onload = function () {
@@ -66,29 +77,32 @@ window.onload = function () {
 
 function getChannelId() {
    
-    //If you are testing this in IE you may need to uncomment the line below to allow cross site scripting
-	//$.support.cors = true; 
-    
-    //Using ajax here, could have used getJSON but the error handling is awful
-	$.ajax({
-	    url: "https://api.twitch.tv/kraken/search/channels?query=" + channel,
-	    dataType: 'json',
-        headers: {
-            'Client-ID': '5lc2pznnxzs8gijvw7qgaw8eoisj6nd',
-            'Accept': 'application/vnd.twitchtv.v5+json'
-        },
-        success: getChannelIdCallback
-	})
-    
-}
+    //Rewritten to use fetch rather than ajax
 
-function getChannelIdCallback(data) {
+    //Some detailed comments so I remember what I did
+    //Set up the request, we need url, method and headers which are defined as globals to aid reuse
+    var request = new Request('https://api.twitch.tv/kraken/search/channels?query=' + channel, {
+        headers: v5headers,
+        method: 'GET'
+    });
 
-    //We need to set the channel Id rather than the name
-    channel = data["channels"][0]["_id"];
-	
-	//Debugging but left in for ease of use
-	getStream();
+    //Make the call using fetch, which returns a promise
+    //When the fetch succeeds return the response as json
+    //Then manage the data it contained
+    //Catch just in case
+    fetch(request).then(function(response) {
+        //Success, return the response as JSON
+        return response.json();
+    }).then(function (data){
+        //Data contains the JSON from the response
+        //Update the global variable with the channel id rather than the name
+        channel = data["channels"][0]["_id"];
+        //Now we can get the current game
+        getStream();
+    }).catch(function (err) {
+       console.log(err);
+    });
+    
 }
 
 //End of Kraken v5 requirement
@@ -98,93 +112,101 @@ function getStream() {
    
     //This is the REST url for the streams data for my channel
     //https://api.twitch.tv/kraken/streams/unshapedadrian
-    
-    //Using ajax here, could have used getJSON but the error handling is awful
-	$.ajax({
-	    url: "https://api.twitch.tv/kraken/streams/" + channel,
-	    dataType: 'json',
-        headers: {
-            'Client-ID': '5lc2pznnxzs8gijvw7qgaw8eoisj6nd',
-            'Accept': 'application/vnd.twitchtv.v5+json'
-        },
-        success: getStreamCallback
-	})
-    
-}
+       
+    //Some detailed comments so I remember what I did
+    //Set up the request, we need url, method and headers which are defined as globals to aid reuse
+    /* var request = new Request('https://api.twitch.tv/kraken/streams/' + channel, {
+        headers: v5headers,
+        method: 'GET'
+    }); */
 
-function getStreamCallback (data) {
-    
-    //get the stream start time in UTC from the data returned from Twitch API
-    //this is a sample of the format the data is returned in "2016-04-02T14:18:28Z"
-    //Actually don't need to worry about Time Zones as I am looking at differences
-    //in time not actual times.
-    var streamCreatedDate = null;
-    var streamStartDate = null;
-	var streamStartUTCDate = null;
-    var streamCurrentDate = null;
-	var streamUTCDate = null;
-    var diffMilliseconds = null;
-    //Check to see if the data actually contains a stream object
-    //If not then the stream isn't live we can then make some decisions on what to do
-    if(data["stream"] === null){
-        //If isStreamLive is true then we know that the stream was live and now it isn't
-        //In that case we can go back to polling Twitch every one minute
-        //And cancel the one second timer.
-        if (isStreamLive === true) {
-            clearInterval(myOneSecondCounter);
-            clearInterval(myTwitchPoller);
-            myTwitchPoller = setInterval(getStream, oneMinutePoll);
-            isStreamLive = false;
-            //clear the displayed timer
-            upDateText("");
+    var request = new Request('https://api.twitch.tv/helix/streams?user_id=' + channel, {
+        headers: helixheaders,
+        method: 'GET'
+    });
+
+    //Make the call using fetch, which returns a promise
+    //When the fetch succeeds return the response as json
+    //Then manage the data it contained
+    //Catch just in case
+    fetch(request).then(function(response) {
+        //Success, return the response as JSON
+        return response.json();
+    }).then(function (json){
+        //get the stream start time in UTC from the data returned from Twitch API
+        //this is a sample of the format the data is returned in "2016-04-02T14:18:28Z"
+        //Actually don't need to worry about Time Zones as I am looking at differences
+        //in time not actual times.
+        var streamCreatedDate = null;
+        var streamStartDate = null;
+        var streamStartUTCDate = null;
+        var streamCurrentDate = null;
+        var streamUTCDate = null;
+        var diffMilliseconds = null;
+        //Check to see if the data actually contains a stream object
+        //If not then the stream isn't live we can then make some decisions on what to do
+        if(json.data === null){
+            //If isStreamLive is true then we know that the stream was live and now it isn't
+            //In that case we can go back to polling Twitch every one minute
+            //And cancel the one second timer.
+            if (isStreamLive === true) {
+                clearInterval(myOneSecondCounter);
+                clearInterval(myTwitchPoller);
+                myTwitchPoller = setInterval(getStream, oneMinutePoll);
+                isStreamLive = false;
+                //clear the displayed timer
+                upDateText("");
+            }
+            //If there's no data then just return, polling will continue
+            return;
+        } else {
+            streamCreatedDate = json.data[0].started_at;
+            isStreamLive = true;
         }
-        //If there's no data then just return, polling will continue
-        return;
-    } else {
-        streamCreatedDate = data["stream"]["created_at"];
-        isStreamLive = true;
-    }
-    
-    //The default date constructor works well on our date format
-    streamStartDate = new Date(streamCreatedDate);
-	
-	//Convert the stream start time into UTC 	
-	streamStartUTCDate = new Date(streamStartDate.getUTCFullYear(), streamStartDate.getUTCMonth(), streamStartDate.getUTCDate(),  streamStartDate.getUTCHours(), streamStartDate.getUTCMinutes(), streamStartDate.getUTCSeconds());
-    
-   
-    //get the current time now() returns milliseconds
-    streamCurrentDate = new Date(Date.now());
-	
-	//Convert the current local time into UTC 	
-	streamUTCDate = new Date(streamCurrentDate.getUTCFullYear(), streamCurrentDate.getUTCMonth(), streamCurrentDate.getUTCDate(),  streamCurrentDate.getUTCHours(), streamCurrentDate.getUTCMinutes(), streamCurrentDate.getUTCSeconds());
-    
-    
-    //subtract start from current to give uptime
-   
-    diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartUTCDate.getTime());
-    
-    //extract the hours minutes seconds and update globals
-    
-    hrs = diffMilliseconds.getUTCHours();
-    mins = diffMilliseconds.getUTCMinutes();
-    secs = diffMilliseconds.getUTCSeconds();
-    
-    //show the time
-    displayTime();
-    
-    //OK here we can test if we got data from Twitch and
-    //if so cancel the Twitch poller and start counting up
-    if(isStreamLive === true){
-        //We can cancel the poll to Twitch
-        clearInterval(myTwitchPoller);
-        //And start the counter going up
-        if(myOneSecondCounter === null){
-            myOneSecondCounter = setInterval(countUp, oneSecondPoll);
-        }
-        //And start the longer poll to Twitch
-        myTwitchPoller = setInterval(getStream, tenMinutePoll);
-    } 
         
+        //The default date constructor works well on our date format
+        streamStartDate = new Date(streamCreatedDate);
+        
+        //Convert the stream start time into UTC 	
+        streamStartUTCDate = new Date(streamStartDate.getUTCFullYear(), streamStartDate.getUTCMonth(), streamStartDate.getUTCDate(),  streamStartDate.getUTCHours(), streamStartDate.getUTCMinutes(), streamStartDate.getUTCSeconds());
+        
+    
+        //get the current time now() returns milliseconds
+        streamCurrentDate = new Date(Date.now());
+        
+        //Convert the current local time into UTC 	
+        streamUTCDate = new Date(streamCurrentDate.getUTCFullYear(), streamCurrentDate.getUTCMonth(), streamCurrentDate.getUTCDate(),  streamCurrentDate.getUTCHours(), streamCurrentDate.getUTCMinutes(), streamCurrentDate.getUTCSeconds());
+        
+        
+        //subtract start from current to give uptime
+    
+        diffMilliseconds = new Date(streamUTCDate.getTime() - streamStartUTCDate.getTime());
+        
+        //extract the hours minutes seconds and update globals
+        
+        hrs = diffMilliseconds.getUTCHours();
+        mins = diffMilliseconds.getUTCMinutes();
+        secs = diffMilliseconds.getUTCSeconds();
+        
+        //show the time
+        displayTime();
+        
+        //OK here we can test if we got data from Twitch and
+        //if so cancel the Twitch poller and start counting up
+        if(isStreamLive === true){
+            //We can cancel the poll to Twitch
+            clearInterval(myTwitchPoller);
+            //And start the counter going up
+            if(myOneSecondCounter === null){
+                myOneSecondCounter = setInterval(countUp, oneSecondPoll);
+            }
+            //And start the longer poll to Twitch
+            myTwitchPoller = setInterval(getStream, tenMinutePoll);
+        } 
+    }).catch(function (err) {
+       console.log(err);
+    });
+    
 }
 
 function countUp(){
@@ -289,7 +311,12 @@ function parseText() {
 	
 }
 
-//This is a small piece of jQuery which updates the contents of the div
+//This is a small piece of code that updates the contents of a div
 function upDateText(comment) {
-	$('#uptime').html(comment);
+        
+    var text = document.getElementById("uptime");
+
+    if (comment !== null && typeof comment !== "undefined") {
+       text.innerHTML = comment;
+   }
 }
