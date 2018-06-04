@@ -5,6 +5,8 @@ var channel = 'unshapedadrian';
 
 //global for output format
 var myOutputFormat = 'hh:mm:ss';
+//edit this value if you want something other than 00:00:00 to appear when you are offline
+var myOfflineString = "";
 
 //The variable above determines how the uptime is presented in the scene
 //You can change the word Uptime: to something of your choosing
@@ -271,6 +273,10 @@ function displayTime(){
         } else {
             outputText = outputText + secs;
         }
+    }
+
+    if(myOfflineString != "" && hrs === 0 && mins === 0 && secs === 0){
+        outputText = myOfflineString;
     }
     
     upDateText(outputText);

@@ -17,6 +17,16 @@ For example to display "I've been streaming for:" and then display hours minutes
 
 var myOutputFormat = 'I've been streaming for: hh:mm:ss';
 
+By default the tool will display 00:00:00 when you are offline.
+
+If you want to change the text that is displayed when you are offline then edit the line that looks like this:
+
+var myOfflineString = "";
+
+For example to display "Stream Offline" make the following change:
+
+var myOfflineString = "Stream Offline";
+
 
 Please Note that when the Browser page is active in OBS it will poll Twitch to work out if the stream is live, to prevent this just hide the source in OBS.
 To use in OBS Studio:
