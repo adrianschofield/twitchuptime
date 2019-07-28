@@ -83,10 +83,16 @@ function getChannelId() {
 
     //Some detailed comments so I remember what I did
     //Set up the request, we need url, method and headers which are defined as globals to aid reuse
-    var request = new Request('https://api.twitch.tv/kraken/search/channels?query=' + channel, {
+    /* var request = new Request('https://api.twitch.tv/kraken/search/channels?query=' + channel, {
         headers: v5headers,
         method: 'GET'
-    });
+    });*/
+
+    //OK Let's see if we can get this from Helix now
+    var request = new Request('https://api.twitch.tv/helix/users?login=' + channel, {
+        headers: helixheaders,
+        method: 'GET'
+    })
 
     //Make the call using fetch, which returns a promise
     //When the fetch succeeds return the response as json
@@ -98,7 +104,9 @@ function getChannelId() {
     }).then(function (data){
         //Data contains the JSON from the response
         //Update the global variable with the channel id rather than the name
-        channel = data["channels"][0]["_id"];
+        //channel = data["channels"][0]["_id"];
+        //For Helix the format of the returned data has changed
+        channel = data.data[0]["id"];
         //Now we can get the current game
         getStream();
     }).catch(function (err) {
