@@ -1,5 +1,7 @@
 # Twitch-Uptime #
 
+# This tool no longer works since Twitch changed their API auth requirements #
+
 Display Twitch stream uptime in OBS or Xsplit
 
 Download all the files using the Download button top right and store them in a folder on your hard drive. There is a zip available here: http://unshapedadrian.co.uk/downloads/twitchuptime.zip but it may be out of date.

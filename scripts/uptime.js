@@ -1,7 +1,9 @@
 'use strict';
 
 //channel name - edit this to reflect your channel name
-var channel = 'unshapedadrian';
+var channel = '';
+
+var oAuthToken = '';
 
 //global for output format
 var myOutputFormat = 'hh:mm:ss';
@@ -49,6 +51,9 @@ v5headers.append('Content-Type', 'application/json');
 //Helix headers
 var helixheaders = new Headers();
 helixheaders.append('Client-ID', 'nfmebw2293663r1rski1j8d5vezfvpz');
+if(oAuthToken !== '') {
+    helixheaders.append('Authorization', 'Bearer ' + oAuthToken);
+}
 
 //This code runs when the DOM objects are initialised as defined in the jQuery documentation
 
